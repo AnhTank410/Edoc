@@ -8,6 +8,6 @@ import javax.swing.text.html.Option;
 import java.util.Optional;
 
 @Repository
-public interface VaitroReponsitory extends JpaRepository<Vaitro,Integer> {
+public interface VaitroReponsitory extends JpaRepository<Vaitro,Long> {
     Optional<Vaitro> findByTen(String ten);
 }

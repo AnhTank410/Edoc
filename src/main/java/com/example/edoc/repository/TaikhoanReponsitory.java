@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface TaikhoanReponsitory extends JpaRepository<Taikhoan,Integer> {
+public interface TaikhoanReponsitory extends JpaRepository<Taikhoan,Long> {
     boolean existsByTaikhoan(String taikhoan);
     Optional<Taikhoan> findByTaikhoan(String taikhoan);
 }

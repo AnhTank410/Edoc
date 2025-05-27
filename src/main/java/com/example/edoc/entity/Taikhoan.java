@@ -1,14 +1,16 @@
 package com.example.edoc.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Taikhoan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,5 +22,5 @@ public class Taikhoan {
     private Hoso hoso;
 
     @ManyToMany
-    Set<Vaitro> vaitro;
+    private Set<Vaitro> vaitro;
 }

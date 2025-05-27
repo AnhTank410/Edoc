@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class UpdateTkRequest {
-    private String matkhau;
-    private HosoDto hosoDto;
+@AllArgsConstructor
+public class LogoutRequest {
+    private String token;
 }

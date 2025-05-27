@@ -14,7 +14,9 @@ import com.example.edoc.repository.TaikhoanReponsitory;
 import com.example.edoc.repository.VaitroReponsitory;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +28,10 @@ import java.util.Optional;
 public class TaikhoanService {
     @Autowired
     private TaikhoanReponsitory taikhoanReponsitory;
+
     @Autowired
     private VaitroReponsitory vaitroReponsitory;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -61,17 +65,35 @@ public class TaikhoanService {
 
     }
 
-    public TaikhoanResponse updateTaikhoan(int id, UpdateTkRequest request){
+    public TaikhoanResponse updateTaikhoan(Long id, UpdateTkRequest request){
         Taikhoan taikhoan=taikhoanReponsitory.findById(id)
                 .orElseThrow(()->new AppException(ErrorCode.USER_NOT_FOUND));
-        taikhoan.setMatkhau(passwordEncoder.encode(request.getMakhau()));
-        taikhoan.setHoso(convertHosoDtoToHoso(request.getHosoDto()));
+        if( request.getMatkhau() != null && !request.getMatkhau().isBlank() ){
+            taikhoan.setMatkhau(passwordEncoder.encode(request.getMatkhau()));
+        }
+        if (request.getHosoDto() != null) {
+            HosoDto hosoDto = request.getHosoDto();
+            Hoso hoso = taikhoan.getHoso();
+
+            if (hoso == null) {
+                hoso = new Hoso(); // nếu chưa có thì tạo mới
+                taikhoan.setHoso(hoso);
+            }
+
+            hoso.setHoten(hosoDto.getHoten());
+            hoso.setDienthoai(hosoDto.getDienthoai());
+            hoso.setEmail(hosoDto.getEmail());
+            hoso.setNgaysinh(hosoDto.getNgaysinh());
+        }
         taikhoanReponsitory.save(taikhoan);
         return TaikhoanResponse.builder()
                 .taikhoan(taikhoan.getTaikhoan())
+                .hoso(request.getHosoDto())
                 .build();
     }
-    public void deleteTaikhoan(int id){
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteTaikhoan(Long id){
         taikhoanReponsitory.deleteById(id);
     }
 
@@ -94,14 +116,32 @@ public class TaikhoanService {
     public TaikhoanResponse convertTaikhoanToTaikhoanResponse(Taikhoan taikhoan){
         TaikhoanResponse taikhoanResponse=new TaikhoanResponse();
         taikhoanResponse.setTaikhoan(taikhoan.getTaikhoan());
-        HosoDto hosoDto=new HosoDto();
-        hosoDto.setHoten(taikhoan.getHoso().getHoten());
-        hosoDto.setDienthoai(taikhoan.getHoso().getDienthoai());
-        hosoDto.setEmail(taikhoan.getHoso().getEmail());
-        hosoDto.setNgaysinh(taikhoan.getHoso().getNgaysinh());
-        taikhoanResponse.setHoso(hosoDto);
+        Hoso hoso=taikhoan.getHoso();
+        if(hoso!=null){
+            HosoDto hosoDto=new HosoDto();
+            hosoDto.setHoten(taikhoan.getHoso().getHoten());
+            hosoDto.setDienthoai(taikhoan.getHoso().getDienthoai());
+            hosoDto.setEmail(taikhoan.getHoso().getEmail());
+            hosoDto.setNgaysinh(taikhoan.getHoso().getNgaysinh());
+            taikhoanResponse.setHoso(hosoDto);
+        }else {
+            taikhoanResponse.setHoso(null);
+        }
         return taikhoanResponse;
     }
-
+    public TaikhoanResponse getMyInfo(){
+        var context = SecurityContextHolder.getContext();
+        var username = context.getAuthentication().getName();
+        return taikhoanReponsitory.findByTaikhoan(username)
+                .map(this::convertTaikhoanToTaikhoanResponse)
+                .orElseThrow(()->new AppException(ErrorCode.USER_NOT_FOUND));
+    }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    public TaikhoanResponse getTaiKhoan(Long id){
+        return taikhoanReponsitory.findById(id)
+                .map(this::convertTaikhoanToTaikhoanResponse)
+                .orElseThrow(()->new AppException(ErrorCode.USER_NOT_FOUND));
+    }
 }
 

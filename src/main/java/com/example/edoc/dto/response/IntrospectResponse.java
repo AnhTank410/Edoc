@@ -1,4 +1,4 @@
-package com.example.edoc.dto.request;
+package com.example.edoc.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateTkRequest {
-    private String matkhau;
-    private HosoDto hosoDto;
+public class IntrospectResponse {
+    private boolean valid;
 }

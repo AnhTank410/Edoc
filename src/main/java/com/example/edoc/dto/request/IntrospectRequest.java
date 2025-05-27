@@ -6,10 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class UpdateTkRequest {
-    private String matkhau;
-    private HosoDto hosoDto;
+@AllArgsConstructor
+@Builder
+public class IntrospectRequest {
+    private String token;
 }
